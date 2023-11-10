@@ -1,25 +1,54 @@
 <template>
   <div class="map">
+    <!-- :maxBounds="bounds" -->
     <MapboxMap
       :zoom="14"
-      :access-token="token"
+      :accessToken="token"
       :center="[30.618077, 50.439409]"
-      :maxBounds="bounds"
       mapStyle="mapbox://styles/mapbox/streets-v12"
       @mbCreated="onMapCreated"
     >
+      <MapboxGeocoder
+        @mbCreated="onGeocoderCreated"
+        @mbResult="onSearchResult"
+        @mbClear="searchResult = null"
+      />
+      <MapboxGeolocateControl
+        position="bottom-right"
+        :positionOptions="{ enableHighAccuracy: true }"
+        :trackUserLocation="true"
+        :showUserHeading="true"
+        :showUserLocation="true"
+        @mbTrackuserlocationstart="onUserLocationUpdated"
+      />
     </MapboxMap>
+
+    <div class="map__found">
+      <SearchResultBlock
+        v-if="searchResult"
+        :name="searchResult.place_name"
+        :coordinates="searchResult.center"
+        :location="(searchResult.context || []).map((i) => i.text).join(', ')"
+        @direction="onGetDirectionToSearchResult"
+      />
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import Poliline from '@mapbox/polyline'
-import mapboxgl from 'mapbox-gl'
-import { MapboxMap } from '@studiometa/vue-mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { useMarker } from '../mixins/map'
-import { getMarkerDataByLocation, getDistance } from '../helpers/map'
+import '@mapbox/mapbox-gl-geocoder/lib/mapbox-gl-geocoder.css'
+import mapboxgl from 'mapbox-gl'
+import Poliline from '@mapbox/polyline'
+import {
+  MapboxMap,
+  MapboxGeocoder,
+  MapboxGeolocateControl,
+} from '@studiometa/vue-mapbox-gl'
+import { useMarker } from '../../mixins/map'
+import { getMarkerDataByLocation, getDistance } from '../../helpers/map'
+import SearchResultBlock from '../map/components/SearchResultBlock.vue'
 
 const token = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN
 const bounds = [
@@ -27,7 +56,9 @@ const bounds = [
   [30.65091, 50.46236], // Northeast coordinates
 ]
 const map = ref()
-const markers = ref([])
+const control = ref()
+const searchResult = ref(null)
+const userLocation = ref(null)
 
 const from = [30.616381, 50.438735]
 const to = [30.61975, 50.441853]
@@ -51,14 +82,45 @@ const randomPlaces = [
 const redRouteColor = '#f05454'
 const greenRouteColor = '#6fba71'
 
-console.log(
-  'getDistance >>',
-  getDistance(...places[0], ...randomPlaces[0]) * 1000 < 1000,
-)
-
 const geojson = {
   type: 'FeatureCollection',
   features: places.map((place) => getMarkerDataByLocation(...place)),
+}
+
+const onUserLocationUpdated = (data) => {
+  data.target.options.geolocation.getCurrentPosition((dataPostion) => {
+    console.log('getCurrentPosition >>>', dataPostion)
+    userLocation.value = dataPostion.coords
+  })
+}
+
+const onGetDirectionToSearchResult = async (to) => {
+  const from = [userLocation.value.longitude, userLocation.value.latitude]
+  const directions = await getDirection({
+    profile: 'walking',
+    coordinates: [from, to].map((arr) => arr.join(',')).join(';'),
+    // exclude: excludedLocations
+    //   .map((location) => `point(${location.lon},${location.lat})`)
+    //   .join(';'),
+    // waypoints: [from, ...places, to].map((arr) => arr.join(',')).join(';'),
+    exclude: 'ferry',
+    token: token,
+  })
+
+  directions.routes.forEach((route) => {
+    addDirectionRoute(directions.uuid, route.geometry, greenRouteColor)
+  })
+}
+
+const onSearchResult = (response) => {
+  searchResult.value = response.result
+  window.searchResult = searchResult
+}
+
+const onGeocoderCreated = (geocoderInstance) => {
+  debugger
+  control.value = geocoderInstance
+  console.log('geocoderInstance >>', geocoderInstance)
 }
 
 const onMapCreated = async (mapboxInstance) => {
@@ -102,9 +164,7 @@ const onMapCreated = async (mapboxInstance) => {
 
   const directions = await getDirection({
     profile: 'walking',
-    coordinates: [from, to]
-      .map((arr) => arr.join(','))
-      .join(';'),
+    coordinates: [from, to].map((arr) => arr.join(',')).join(';'),
     // exclude: excludedLocations
     //   .map((location) => `point(${location.lon},${location.lat})`)
     //   .join(';'),
@@ -128,7 +188,7 @@ const onMapCreated = async (mapboxInstance) => {
 
   routes.forEach((route) => {
     filterRoute(route)
-    addDirectionRoute(route.geometry, greenRouteColor, 15)
+    addDirectionRoute('123', route.geometry, greenRouteColor, 15)
   })
 
   addCurrentLocation()
@@ -141,10 +201,11 @@ const onMapCreated = async (mapboxInstance) => {
       let isNearToRoute = false
       for (let i = 0; i < geometry.coordinates.length; i++) {
         const routePlace = geometry.coordinates[i]
-        const distanceBetweenInMeters = (getDistance(...place, ...routePlace) || 0) * 1000
+        const distanceBetweenInMeters =
+          (getDistance(...place, ...routePlace) || 0) * 1000
         if (distanceBetweenInMeters < 200) {
           isNearToRoute = true
-          break;
+          break
         }
       }
       return isNearToRoute
@@ -169,30 +230,23 @@ const onMapCreated = async (mapboxInstance) => {
     const newRoutes = newDirections.routes
 
     newRoutes.forEach((route) => {
-      addDirectionRoute(route.geometry, redRouteColor)
+      addDirectionRoute('12345', route.geometry, redRouteColor)
     })
   }
 }
 
 const addCurrentLocation = () => {
   map.value.addControl(
-    new mapboxgl.GeolocateControl({
-      positionOptions: {
-        enableHighAccuracy: true,
-      },
-      // When active the map will receive updates to the device's location as it changes.
-      trackUserLocation: true,
-      // Draw an arrow next to the location dot to indicate which direction the device is heading.
-      showUserHeading: true,
-    }),
+    new mapboxgl.NavigationControl({ visualizePitch: true }),
+    'bottom-right',
   )
 }
 
-const addDirectionRoute = (geometryString, color = '#03AA46', width = 8) => {
+function addDirectionRoute(id, geometryString, color = '#03AA46', width = 8) {
   const geometry = Poliline.toGeoJSON(geometryString)
   console.log('geometryString >>>', geometry)
   map.value.addLayer({
-    id: `route-${color}`,
+    id,
     type: 'line',
     source: {
       type: 'geojson',
@@ -284,12 +338,19 @@ const getDirection = async ({
 
 <style lang="sass">
 .map
+    position: relative
     width: 100%
     height: 100%
 
     .mapboxgl-map
         width: 100%
         height: 100%
+
+    &__found
+      position: absolute
+      bottom: 10px
+      left: 10px
+      z-index: 10
 
 .marker
   background-image: url('https://docs.mapbox.com/help/demos/custom-markers-gl-js/mapbox-icon.png')
