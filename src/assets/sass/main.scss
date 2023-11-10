@@ -1,0 +1,160 @@
+#app {
+  display: flex;
+  height: 100vh;
+  padding: 0;
+  flex: 1;
+}
+
+h3 {
+  color: $primary-color;
+  font-family: Roboto, sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+}
+
+.top-menu-container {
+  display: flex;
+  z-index: 3;
+  position: absolute;
+  width: 100%;
+
+  align-content: center;
+  padding: 10px;
+
+  input {
+    width: 230px;
+    background-color: white;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid $border-color-black;
+    margin-inline: 5px;
+  }
+
+  button {
+    border: 1px solid $border-color-black;
+    background-color: white;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    place-items: center;
+  }
+
+  #app {
+    display: flex;
+    height: 100vh;
+    padding: 0;
+    flex: 1;
+  }
+}
+
+@media (max-width: 430px) {
+  body {
+    display: flex;
+    place-items: center;
+  }
+
+  #app {
+    display: flex;
+    height: 100vh;
+    padding: 0;
+    flex: 1;
+  }
+
+  .top-menu-container {
+
+    button  {
+      margin-inline: 1%;
+
+    }
+    input {
+      width: 58%;
+      margin-inline: 1%;
+    }
+  }
+
+}
+
+.filter-container {
+
+  width: 100%;
+  display: flex;
+  align-items: center;
+
+  .filter-inner {
+    background-color: white;
+    border: 2px solid $border-color-blue;
+    margin-inline: 2%;
+    border-radius: 12px;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .filter-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    button {
+      margin: 15px;
+    }
+
+    h3 {
+      margin-inline: 20px;
+    }
+  }
+
+  .saved-filters {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    div {
+      margin: 20px;
+      width: 90%;
+
+      p {
+        font-family: Roboto, sans-serif;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 18.75px;
+        color: $text-color-blue;
+      }
+    }
+
+
+  }
+
+
+  .items-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    .items {
+      border: 1px solid #000000;
+      background-color: white;
+      border-radius: 20px;
+      padding: 5px 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 5px;
+    }
+  }
+
+
+}
