@@ -1,0 +1,89 @@
+$spaces: (0,5,10,15,20,25,30,35)
+    
+@each $i in $spaces
+    .h-p-#{$i}
+        padding: #{$i}px
+
+    .h-pt-#{$i}
+        padding-top: #{$i}px
+
+    .h-pb-#{$i}
+        padding-bottom: #{$i}px
+
+    .h-pl-#{$i}
+        padding-left: #{$i}px
+
+    .h-pr-#{$i}
+        padding-right: #{$i}px
+
+    .h-ph-#{$i}
+        padding-left: #{$i}px
+        padding-right: #{$i}px
+
+    .h-pv-#{$i}
+        padding-top: #{$i}px
+        padding-bottom: #{$i}px
+
+    .h-m-#{$i}
+        margin: #{$i}px
+
+    .h-mt-#{$i}
+        margin-top: #{$i}px
+
+    .h-mb-#{$i}
+        margin-bottom: #{$i}px
+
+    .h-mr-#{$i}
+        margin-right: #{$i}px
+
+    .h-ml-#{$i}
+        margin-left: #{$i}px
+
+    .h-mh-#{$i}
+        margin-left: #{$i}px
+        margin-right: #{$i}px
+
+.h-hide-scrollbar
+    -ms-overflow-style: none
+    scrollbar-width: none
+
+    &::-webkit-scrollbar
+        display: none
+
+.h-display-block
+    display: block
+
+.h-flex-vertical-center
+    display: flex
+    align-items: center
+
+.h-text
+    &-heading
+        &-1
+            font-size: 20px
+            font-weight: 500
+            line-height: 40px
+        
+        &-2
+            font-size: 16px
+            font-weight: 500
+            line-height: 24px
+
+    &-body
+        &-base
+            font-size: 14px
+            font-weight: 300
+            line-height: 24px
+
+            &-bold
+                font-weight: 500
+
+        &-small
+            font-size: 12px
+            font-weight: 300
+            line-height: 16px
+
+            &-bold
+                font-size: 12px
+                line-height: 16px
+                font-weight: 500
