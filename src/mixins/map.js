@@ -19,7 +19,9 @@ export function useMarker({ marker, map, popup, className = 'marker' }) {
 
   const mapPopup = new mapboxgl.Popup({ offset: 25 }).setHTML(popupContent)
 
-  const mapMarker = new mapboxgl.Marker(el).setLngLat(marker.geometry.coordinates)
+  const mapMarker = new mapboxgl.Marker(el).setLngLat(
+    marker.geometry.coordinates,
+  )
 
   if (popup) {
     mapMarker.setPopup(mapPopup)

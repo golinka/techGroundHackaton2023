@@ -1,4 +1,4 @@
-const apiOrigin = `${import.meta.env.VITE_API_ORIGIN}/api/v1/`
+const apiOrigin = `${import.meta.env.VITE_API_ORIGIN}/api/v1`
 const mapApiOrigin = `https://api.mapbox.com/directions/v5/mapbox`
 
 export const getMapDirection = async ({ profile, coordinates, params }) => {
