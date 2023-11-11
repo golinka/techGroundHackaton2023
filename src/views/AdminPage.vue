@@ -1,12 +1,38 @@
+<script>
+import EntitiesList from "./EntitiesList.vue";
+import AddNewEntity from "./AddNewEntity.vue";
+import HeaderMenu from "./HeaderMenu.vue";
+
+export default {
+  components: {
+    HeaderMenu,
+    AddNewEntity,
+    EntitiesList
+  },
+  data() {
+    return {
+      showAddNew: false
+    }
+  },
+  methods: {}
+}
+</script>
+
 <template>
   <div class="admin-page">
-    <div class="container">
-      <div class="row">
-        <div class="col-xs-12">
-          <h1>Hello, Bootstrap and Vite!</h1>
-          <button class="btn btn-primary">Primary button</button>
-        </div>
-      </div>
-    </div>
+    <HeaderMenu/>
+    <router-view></router-view>
   </div>
+
 </template>
+
+<style>
+header {
+  height: 5vh;
+  background-color: #5076FE;
+}
+
+header a {
+  color: #fff;
+}
+</style>
