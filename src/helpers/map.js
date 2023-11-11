@@ -3,13 +3,13 @@ import Poliline from '@mapbox/polyline'
 const EARTH_RADIUS = 6371
 
 // to get distance between locations in km
-export function getDistance(lat1, lon1, lat2, lon2) {
-  const dLat = ((lat2 - lat1) * Math.PI) / 180
-  const dLon = ((lon2 - lon1) * Math.PI) / 180
+export function getDistance({ from, to }) {
+  const dLat = ((to.lat - from.lat) * Math.PI) / 180
+  const dLon = ((to.lon - from.lon) * Math.PI) / 180
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
+    Math.cos((from.lat * Math.PI) / 180) *
+      Math.cos((to.lat * Math.PI) / 180) *
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2)
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
@@ -25,6 +25,13 @@ export function getMarkerDataByLocation({ lat, lon, properties = { title: 'Mapbo
     },
     properties,
   }
+}
+
+export function mapFlyTo({ map, coordinates }) {
+  map.flyTo({
+    center: coordinates,
+    essential: true,
+  })
 }
 
 export function getCoordinatesParamValue(coordinates) {
@@ -49,6 +56,39 @@ export function addRoute({
         type: 'Feature',
         properties: {},
         geometry: geometryJSON,
+      },
+    },
+    layout: {
+      'line-join': 'round',
+      'line-cap': 'round',
+    },
+    paint: {
+      'line-color': color,
+      'line-width': borderWidth,
+      'line-opacity': 0.75,
+    },
+  })
+  return id
+}
+
+// Add route marker
+export function addRouteMarker({
+  id = `route-id-${Math.random()}`,
+  geometry,
+  map,
+  color = '#03AA46',
+  borderWidth = 8,
+}) {
+  // const geometryJSON = Poliline.toGeoJSON(geometry)
+  map.addLayer({
+    id,
+    type: 'line',
+    source: {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        properties: {},
+        geometry,
       },
     },
     layout: {

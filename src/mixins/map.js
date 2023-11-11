@@ -8,6 +8,7 @@ const token = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN
 export function useMarker({ marker, map, popup, className = 'marker' }) {
   const el = document.createElement('div')
   el.className = className
+  el.setAttribute('coordinates', JSON.stringify(marker.geometry.coordinates))
 
   const popupAttributes = (popup?.attributes || []).map((attr) => attr.type)
   const popupContent = `
@@ -30,31 +31,43 @@ export function useMarker({ marker, map, popup, className = 'marker' }) {
   return mapMarker.addTo(map)
 }
 
+export function useRouteMarker({ marker, map, className = 'marker' }) {
+  const el = document.createElement('div')
+  el.className = className
+
+  return new mapboxgl.Marker(el)
+    .setLngLat(marker.geometry.coordinates)
+    .addTo(map)
+}
+
 export async function useAccessibilityRoute({
   profile = 'walking',
   route,
   accessibilityPlaces,
-  thresholdDistance = 200,
+  thresholdDistance = 500,
 }) {
   const geometry = Poliline.toGeoJSON(route.geometry)
   const from = geometry.coordinates[0]
   const to = geometry.coordinates[geometry.coordinates.length - 1]
 
-  const validAccessibilityPlaces = accessibilityPlaces.filter((place) => {
-    let isNearToRoute = false
-    for (let i = 0; i < geometry.coordinates.length; i++) {
-      const routePlace = geometry.coordinates[i]
-      const distanceBetweenInMeters =
-        (getDistance(...place, ...routePlace) || 0) * 1000
-      if (distanceBetweenInMeters < thresholdDistance) {
-        isNearToRoute = true
-        break
+  const validAccessibilityPlaces = accessibilityPlaces
+    .filter((place) => {
+      let isNearToRoute = false
+      for (let i = 0; i < geometry.coordinates.length; i++) {
+        const routePlace = geometry.coordinates[i]
+        const distanceBetweenInMeters =
+          (getDistance({
+            from: { lat: place.longitude, lon: place.latitude },
+            to: { lat: routePlace[0], lon: routePlace[1] },
+          }) || 0) * 1000
+        if (distanceBetweenInMeters < thresholdDistance) {
+          isNearToRoute = true
+          break
+        }
       }
-    }
-    return isNearToRoute
-  })
-
-  debugger
+      return isNearToRoute
+    })
+    .map((item) => [item.longitude, item.latitude])
 
   const newDirection = await getMapDirection({
     profile,
