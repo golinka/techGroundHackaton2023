@@ -3,6 +3,7 @@
     <div v-if="error">{{ error }}</div>
     <div v-if="isLoading">Loading...</div>
     <div v-else>
+      <div class="h3 w-100 d-flex justify-content-center mt-5">{{ message }}</div>
       <div class="container add-new-container">
           <form class="d-flex" @submit.prevent="onSubmit">
             <div class="m-5">
@@ -63,10 +64,11 @@
                 <select class="form-control" v-model="form.attributes" id="attributes" @change="addAttribute">
                   <option v-for="attribute of attributeValues" :value="attribute">{{ attribute.type }}</option>
                 </select>
-                <div v-if="selectedAttributes.length>0" class="select-attr-container">
-                  <span v-for="attr in selectedAttributes">{{attr.type}}</span>
-                </div>
               </div>
+              <div v-if="selectedAttributes.length>0" class="select-attr-container">
+                <span v-for="attr in selectedAttributes">{{attr.type}} <button @click="removeAttribute(attr)">X</button></span>
+              </div>
+
               <button class="btn btn-primary mt-3" @click="saveItem()">Submit</button>
             </div>
           </form>
@@ -106,7 +108,7 @@ export default {
       attributeValues: [],
       isLoading: true,
       selectedAttributes: [],
-      options: ['list', 'of', 'options']
+      message: ""
     };
   },
 
@@ -114,9 +116,14 @@ export default {
     addAttribute() {
       this.selectedAttributes.push(this.form.attributes);
     },
+    removeAttribute(attr) {
+      this.selectedAttributes = this.selectedAttributes.filter(item => item.id !== attr.id);
+    },
+
     saveItem() {
       console.log(this.form);
       //todo work around}
+      this.message = "Entity was added";
       this.form.attributes = this.selectedAttributes.map(({id}) => {return {id}});
       axiosClient.post('/map-object', this.form).then(function (response) {
         console.log(response);
@@ -165,7 +172,7 @@ export default {
 .select-attr-container {
   margin: 10px;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: auto auto;
   justify-items: center;
   width: fit-content;
 }
@@ -178,7 +185,14 @@ export default {
   margin: 2px;
   border: 1px solid #5076FE;
   border-radius: 10px;
-
+}
+.select-attr-container span button {
+  position: relative;
+  right: 0;
+  top: -5px;
+  width: 10px;
+  font-size: 10px;
+  color: gray;
 }
 
 @media (max-width: 430px) {

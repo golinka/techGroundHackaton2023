@@ -3,6 +3,7 @@
     <div v-if="error">{{ error }}</div>
     <div v-if="isLoading">Loading...</div>
     <div v-else>
+      <div class="h3 w-100 d-flex justify-content-center mt-5">{{ message }}</div>
       <div class="container add-new-container mt-2">
         <form class="d-flex" @submit.prevent="onSubmit">
           <div class="m-5">
@@ -60,17 +61,17 @@
             </div>
             <div class="form-group mt-1">
               <label for="attributes">Attributes</label>
-              <select class="form-control" v-model="form.attributes" id="attributes">
+              <select class="form-control" v-model="form.attributes" id="attributes" @change="addAttribute">
                 <option v-for="attribute of attributeValues" :value="attribute">{{ attribute.type }}</option>
               </select>
-              <div v-if="selectedAttributes.length" class="select-attr-container">
-                <span v-for="attr in selectedAttributes">{{ attr.type }}</span>
+              <div v-if="selectedAttributes.length>0" class="select-attr-container">
+                <span v-for="attr in selectedAttributes">{{attr.type}} <button @click="removeAttribute(attr)">X</button></span>
               </div>
             </div>
             <button class="btn btn-primary mt-3" @click="updateItem()">Update</button>
           </div>
           <div>
-            <button class="btn btn-danger" @click="deleteItem(form)"> Delete</button>
+            <button class="btn btn-danger" @click="deleteItem"> Delete</button>
           </div>
         </form>
       </div>
@@ -80,8 +81,12 @@
 
 <script>
 import axiosClient from "../services/axios.js";
+import {Modal} from 'usemodal-vue3';
 
 export default {
+  components: {
+    Modal
+  },
   data() {
     return {
       form: {
@@ -109,15 +114,26 @@ export default {
       streetTypes: ["street", "prospect", "highway", "boulevard"],
       attributeValues: [],
       selectedAttributes: [],
-      isLoading: true
+      isLoading: true,
+      isVisible: false
     };
   },
 
   methods: {
+    addAttribute() {
+      this.selectedAttributes.push(this.form.attributes);
+    },
+    removeAttribute(attr) {
+      this.selectedAttributes = this.selectedAttributes.filter(item => item.id !== attr.id);
+    },
+
     deleteItem() {
+      console.log("delete called");
+      this.message = "Object was deleted!";
       axiosClient.delete(`/map-object/${this.$route.params.id}`).then(
           function (response) {
-            this.message = response.data.message;
+            console.log("deleted object");
+            this.message = "Object was deleted!";
             this.form = {
               latitude: '',
               longitude: '',
@@ -133,12 +149,16 @@ export default {
               attributes: ''
             };
           }
-      )
+      ).catch(function (error) {
+        this.error = 'error.response.data';
+        console.log(error);
+      });
     },
     updateItem() {
       console.log(this.form);
       //todo work around
       this.form.attributes = [{id: 1}];
+      this.message = "Object was updated";
       axiosClient.put(`/map-object/${this.$route.params.id}`, this.form).then(
           function (response) {
             console.log(response);
@@ -184,7 +204,7 @@ export default {
             website: resForm.website,
             attributes: resForm.attributes
           };
-          this.selectedAttributes = resForm.attributes | [];
+          this.selectedAttributes = [];
           console.log(this.form);
         })
         .catch(error => {
@@ -215,7 +235,7 @@ export default {
 .select-attr-container {
   margin: 10px;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   justify-items: center;
   width: fit-content;
 }
