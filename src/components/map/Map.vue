@@ -68,7 +68,7 @@ const routes = ref([])
 const searchResult = ref(null)
 const userLocation = ref(null)
 
-const from = [30.616381, 50.438735]
+const from = [30.619905, 50.437924]
 const to = [30.61975, 50.441853]
 
 const baseRoute = computed(() =>
@@ -97,26 +97,12 @@ const suggestedRoute = computed(() =>
 //   'top-left',
 // )
 
-const places = [
+const accessibilityPlaces = [
   [30.616152, 50.439357],
   [30.616021, 50.4396],
   [30.614574, 50.441341],
   [30.6169, 50.441986],
   [30.61913, 50.442613],
-]
-
-const randomPlaces = [
-  [30.611355, 50.442239],
-  [30.619494, 50.44477],
-  [30.62251, 50.438532],
-  [30.627634, 50.439708],
-  [30.628366, 50.44205],
-]
-
-// TODO: filter from all objects
-const accessibilityPlaces = [
-  [30.616156, 50.439352],
-  [30.616059, 50.439532],
 ]
 
 const redRouteColor = '#f05454'
@@ -169,6 +155,7 @@ const onMapCreated = async (mapboxInstance) => {
       profile: 'walking',
       route,
       accessibilityPlaces,
+      thresholdDistance: 1000
     })
 
     // base route
@@ -177,7 +164,6 @@ const onMapCreated = async (mapboxInstance) => {
       map: map.value,
       geometry: route.geometry,
       color: greenRouteColor,
-      borderWidth: 15,
     })
     routes.push({
       type: BASE_ROUTE_TYPE,
@@ -224,8 +210,12 @@ const renderMapObjects = async () => {
         }),
         popup: {
           title: mapObject.title,
-          address: [mapObject.street_name, mapObject.building, mapObject.city].join(', '),
-          attributes: mapObject.attributes
+          address: [
+            mapObject.street_name,
+            mapObject.building,
+            mapObject.city,
+          ].join(', '),
+          attributes: mapObject.attributes,
         },
         map: map.value,
         className: 'marker-red',

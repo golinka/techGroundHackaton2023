@@ -34,6 +34,7 @@ export async function useAccessibilityRoute({
   profile = 'walking',
   route,
   accessibilityPlaces,
+  thresholdDistance = 200,
 }) {
   const geometry = Poliline.toGeoJSON(route.geometry)
   const from = geometry.coordinates[0]
@@ -45,7 +46,7 @@ export async function useAccessibilityRoute({
       const routePlace = geometry.coordinates[i]
       const distanceBetweenInMeters =
         (getDistance(...place, ...routePlace) || 0) * 1000
-      if (distanceBetweenInMeters < 200) {
+      if (distanceBetweenInMeters < thresholdDistance) {
         isNearToRoute = true
         break
       }
@@ -53,9 +54,7 @@ export async function useAccessibilityRoute({
     return isNearToRoute
   })
 
-  // accessibilityPlacesOnTheRoad.forEach((marker) =>
-  //   useMarker(getMarkerDataByLocation(...marker), map.value, 'marker-red'),
-  // )
+  debugger
 
   const newDirection = await getMapDirection({
     profile,
