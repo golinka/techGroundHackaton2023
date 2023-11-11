@@ -43,7 +43,7 @@ export const getLocationBySearch = async ({ query, params }) => {
 export const getMapObjects = async (params) => {
   const response = await fetch(
     getUrlWithParams(`${apiOrigin}/map-object`, params),
-    { method: 'GET' },
+    { method: 'GET', headers: { 'ngrok-skip-browser-warning': 'True' } },
   )
 
   return response.json()

@@ -1,5 +1,12 @@
 <template>
   <div class="search-result-block">
+    <div
+      class="search-result-block__close"
+      aria-label="Закрити"
+      @click="$emit('close')"
+    >
+      <img :src="closeIcon" alt="Закрити" />
+    </div>
     <div class="search-result-block__name h5 mb-3">
       {{ props.name || 'Софиевская Борщаговка, Киевская область, Украина' }}
     </div>
@@ -19,19 +26,30 @@
 
 <script setup>
 import walkingManIcon from '../../../assets/svg/walking-man.svg'
+import closeIcon from '../../../assets/svg/close.svg'
 import AppButton from '../../base/AppButton.vue'
 
 const props = defineProps(['name', 'location', 'coordinates'])
-const emit = defineEmits(['direction'])
+const emit = defineEmits(['direction', 'close'])
 </script>
 
 <style lang="sass">
 .search-result-block
+    position: relative
     width: 300px
     max-width: 100%
     padding: 15px 10px
     border-radius: 5px
     background-color: $white
+
+    &__close
+        position: absolute
+        right: 15px
+        top: 10px
+
+        img
+            height: 20px
+            width: 20px
 
     &__buttons
         .app-button

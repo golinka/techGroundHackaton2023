@@ -36,6 +36,7 @@
         :coordinates="choosenPlace.center"
         :location="(choosenPlace.context || []).map((i) => i.text).join(', ')"
         @direction="onGetDirectionToSearchResult"
+        @close="onGetDirectionClose"
       />
     </div>
   </div>
@@ -95,7 +96,7 @@ const onUSerLocationMounted = () => {
   }, SHOW_USER_LOCATION_DELAY)
 }
 
-const redRouteColor = '#f05454'
+const blueRouteColor = '#5076FE'
 const greenRouteColor = '#6fba71'
 
 const onUserLocationUpdated = (data) => {
@@ -110,6 +111,14 @@ const onGetDirectionToSearchResult = async (to) => {
   mapFlyTo({ map: map.value, coordinates: from })
 
   renderSmartRoutes(from, to)
+}
+
+const onGetDirectionClose = async (to) => {
+  choosenPlace.value = null
+  if (choosenPlaceMarker.value && choosenPlaceMarker.value.remove) {
+    choosenPlaceMarker.value.remove()
+  }
+  mapFlyTo({ map: map.value, coordinates: [userLocation.value.longitude, userLocation.value.latitude] })
 }
 
 const onSearchPlaceChoosen = (place) => {
@@ -172,7 +181,7 @@ const renderSmartRoutes = async (from, to) => {
       id: SUGGESTED_ROUTE_TYPE,
       map: map.value,
       geometry: newRoute.geometry,
-      color: redRouteColor,
+      color: blueRouteColor,
     })
     routes.value.push({
       type: SUGGESTED_ROUTE_TYPE,
