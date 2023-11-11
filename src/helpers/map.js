@@ -40,7 +40,7 @@ export function getCoordinatesParamValue(coordinates) {
 
 // Add direction route
 export function addRoute({
-  id = `route-id-${Math.random()}`,
+  id = `route-${Math.random()}`,
   geometry,
   map,
   color = '#03AA46',

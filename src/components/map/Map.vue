@@ -11,11 +11,6 @@
       mapStyle="mapbox://styles/mapbox/streets-v12"
       @mbCreated="onMapCreated"
     >
-      <!-- <MapboxGeocoder
-        @mbCreated="onGeocoderCreated"
-        @mbResult="onSearchResult"
-        @mbClear="choosenPlace = null"
-      /> -->
 
       <!-- zoom in / zoom out controls -->
       <MapboxNavigationControl
@@ -53,7 +48,6 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import '@mapbox/mapbox-gl-geocoder/lib/mapbox-gl-geocoder.css'
 import {
   MapboxMap,
-  MapboxGeocoder,
   MapboxGeolocateControl,
   MapboxNavigationControl,
 } from '@studiometa/vue-mapbox-gl'
@@ -67,7 +61,7 @@ import {
 import SearchResultBlock from '../map/components/SearchResultBlock.vue'
 import SearchBlock from '../map/components/SearchBlock.vue'
 import { getMapDirection, getMapObjects } from '../../api/map'
-import { ACCESSIBILITY_OBJECTS_KEY } from '../../consts'
+import { ACCESSIBILITY_OBJECTS_KEY, OBJECT_TYPE_ICON_MAPPING } from '../../consts'
 
 const BASE_ROUTE_TYPE = 'base'
 const SUGGESTED_ROUTE_TYPE = 'suggested'
@@ -81,9 +75,6 @@ const userLocation = ref(null)
 
 const choosenPlace = ref(null)
 const choosenPlaceMarker = ref(null)
-
-// const from = [30.619905, 50.437924]
-// const to = [30.61975, 50.441853]
 
 const baseRoute = computed(() =>
   routes.value.find((route) => route.type === BASE_ROUTE_TYPE),
@@ -162,7 +153,7 @@ const renderSmartRoutes = async (from, to) => {
     }
 
     const baseRouteId = addRoute({
-      id: '123',
+      id: BASE_ROUTE_TYPE,
       map: map.value,
       geometry: route.geometry,
       color: greenRouteColor,
@@ -178,7 +169,7 @@ const renderSmartRoutes = async (from, to) => {
     }
 
     const suggestedRouteId = addRoute({
-      id: '123123123123',
+      id: SUGGESTED_ROUTE_TYPE,
       map: map.value,
       geometry: newRoute.geometry,
       color: redRouteColor,
@@ -192,7 +183,7 @@ const renderSmartRoutes = async (from, to) => {
       useMarker({
         marker: getMarkerDataByLocation({ lat, lon }),
         map: map.value,
-        className: 'marker-red',
+        className: 'marker-special',
       })
     })
   })
@@ -225,32 +216,13 @@ const renderMapObjects = async () => {
           attributes: mapObject.attributes,
         },
         map: map.value,
-        className: 'marker-red',
+        className: OBJECT_TYPE_ICON_MAPPING[mapObject.type] || 'marker'
       })
     })
-
-    // renderSmartRoute()
   } catch (err) {
     console.error('Map: renderMapObjects - ')
   }
 }
-
-// {
-//   attributes: []
-//   building: '12A'
-//   campus: null
-//   city: 'Kyiv'
-//   id: 1
-//   is_default: false
-//   latitude: '50.43210162'
-//   longitude: '30.62283928'
-//   phone: null
-//   street_name: 'Березнева'
-//   street_type: 'street'
-//   title: 'Сільпо'
-//   type: 'supermarket'
-//   website: null
-// }
 
 onMounted(() => {
   renderMapObjects()
@@ -293,18 +265,19 @@ onMounted(() => {
                 width: 100%
 
 .marker
-  background-image: url('https://docs.mapbox.com/help/demos/custom-markers-gl-js/mapbox-icon.png')
-  background-size: cover
-  width: 50px
-  height: 50px
-  border-radius: 50%
-  cursor: pointer
+    // background-image: url('https://docs.mapbox.com/help/demos/custom-markers-gl-js/mapbox-icon.png')
+    background-image: url('/building-marker.svg')
+    background-size: cover
+    width: 50px
+    height: 50px
+    border-radius: 50%
+    cursor: pointer
 
-.marker-red
-  background-image: url('/marker.png')
-  background-size: cover
-  width: 50px
-  height: 50px
-  border-radius: 50%
-  cursor: pointer
+.marker-special
+    background-image: url('/special-marker.svg')
+    background-size: cover
+    width: 50px
+    height: 50px
+    border-radius: 50%
+    cursor: pointer
 </style>
